@@ -17,12 +17,20 @@ type DBManger struct {
 
 var dbmanager *DBManger
 
+const (
+	dbUser   = "userid"
+	dbPwd    = "userpwd"
+	dbHost   = "localhost:3306"
+	dbSchema = "test"
+)
+
 func GetConnection() *DBManger {
 	once.Do(func() {
-		db, err := sql.Open("mysql", "userid:password@tcp(localhost:3306)/testschema?charset=utf8")
+		db, err := sql.Open("mysql", dbUser+":"+dbPwd+"@tcp("+dbHost+")/"+dbSchema+"?charset=utf8")
 		if err != nil {
 			panic(err)
 		}
+
 		// See "Important settings" section.
 		db.SetConnMaxLifetime(time.Minute * 3)
 		db.SetMaxOpenConns(10)

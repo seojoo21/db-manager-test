@@ -29,6 +29,8 @@ func (b *BookRepository) FindAll() ([]*dto.BookDto, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var bookDomain domain.Book
 
