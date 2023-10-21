@@ -44,17 +44,70 @@ func getBookList(c echo.Context) error {
 }
 
 func getBook(c echo.Context) error {
-	return c.String(http.StatusOK, "getBook")
+	id := c.Param("id")
+
+	book := service.NewBookService(repository.InitBookRepository())
+	res, err := book.GetBook(id)
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	jsonRes, _ := json.Marshal(res)
+
+	return c.String(http.StatusOK, string(jsonRes))
+}
+
+type bookRequestParams struct {
+	Title  string `json:"title"`
+	Author string `json:"author"`
 }
 
 func saveBook(c echo.Context) error {
-	return c.String(http.StatusOK, "saveBook")
+	requestParams := &bookRequestParams{}
+
+	if err := c.Bind(requestParams); err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	book := service.NewBookService(repository.InitBookRepository())
+	_, err := book.SaveBook(service.BookRequest{Title: requestParams.Title, Author: requestParams.Author})
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.String(http.StatusCreated, "created")
 }
 
 func updateBook(c echo.Context) error {
-	return c.String(http.StatusOK, "updateBook")
+	id := c.Param("id")
+
+	requestParams := &bookRequestParams{}
+
+	if err := c.Bind(requestParams); err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	book := service.NewBookService(repository.InitBookRepository())
+	_, err := book.UpdateBook(service.BookRequest{Id: id, Title: requestParams.Title, Author: requestParams.Author})
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.String(http.StatusNoContent, "updated")
 }
 
 func deleteBook(c echo.Context) error {
-	return c.String(http.StatusOK, "deleteBook")
+	id := c.Param("id")
+
+	book := service.NewBookService(repository.InitBookRepository())
+	_, err := book.DeleteBook(id)
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	return c.String(http.StatusNoContent, "deleted")
 }
