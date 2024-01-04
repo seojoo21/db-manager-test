@@ -16,6 +16,12 @@ func InitBookRepository() *BookRepository {
 	}
 }
 
+func NewBookRepository(dbManager *dbmanager.DBManger) *BookRepository {
+	return &BookRepository{
+		db: dbManager,
+	}
+}
+
 func (b *BookRepository) FindAll() ([]*dto.BookDto, error) {
 	var bookList []*dto.BookDto
 
@@ -68,11 +74,9 @@ func (b *BookRepository) FindById(id string) (*dto.BookDto, error) {
 }
 
 func (b *BookRepository) Save(d *dto.BookDto) (int, error) {
-	queryString := `INSERT INTO BOOKS 
-						(title, author) 
-					VALUES (?, ?)`
+	queryString := `INSERT INTO BOOKS (title, author) VALUES (?, ?)`
 
-	res, err := b.db.TExec(queryString, &d.Title, &d.Author)
+	res, err := b.db.Exec(queryString, &d.Title, &d.Author)
 
 	if err != nil {
 		return -1, err
@@ -92,7 +96,7 @@ func (b *BookRepository) Update(d *dto.BookDto) (int, error) {
 					WHERE 
 						id = ?`
 
-	res, err := b.db.TExec(queryString, &d.Title, &d.Author, &d.Id)
+	res, err := b.db.Exec(queryString, &d.Title, &d.Author, &d.Id)
 
 	if err != nil {
 		return -1, err
@@ -106,7 +110,7 @@ func (b *BookRepository) Update(d *dto.BookDto) (int, error) {
 func (b *BookRepository) Delete(id string) (int, error) {
 	queryString := `DELETE FROM BOOKS WHERE id = ?`
 
-	res, err := b.db.TExec(queryString, &id)
+	res, err := b.db.Exec(queryString, &id)
 
 	if err != nil {
 		return -1, err

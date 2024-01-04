@@ -2,7 +2,6 @@ package dbmanager
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 	"time"
 
@@ -23,6 +22,12 @@ const (
 	dbHost   = "localhost:3306"
 	dbSchema = "test"
 )
+
+func NewDBManager(db *sql.DB) *DBManger {
+	return &DBManger{
+		conn: db,
+	}
+}
 
 func GetConnection() *DBManger {
 	once.Do(func() {
@@ -84,35 +89,6 @@ func (m *DBManger) Exec(query string, args ...interface{}) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return result, err
-}
-
-func (m *DBManger) TExec(query string, args ...interface{}) (sql.Result, error) {
-	var result sql.Result
-	var err error
-
-	tx, err := m.conn.Begin()
-
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	if args != nil && args[0] != "" {
-		result, err = tx.Exec(query, args...)
-	} else {
-		result, err = tx.Exec(query)
-	}
-
-	if err != nil {
-		fmt.Println("err 2 ", err)
-
-		tx.Rollback()
-		return nil, err
-	}
-
-	tx.Commit()
 
 	return result, err
 }
